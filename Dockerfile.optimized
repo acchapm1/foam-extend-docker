@@ -1,0 +1,100 @@
+# Ultra-optimized multi-stage Dockerfile for foam-extend-4.1
+FROM ubuntu:16.04 AS builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install build dependencies in a single layer and clean up aggressively
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential git gcc-4.9 g++-4.9 bison flex cmake curl rpm \
+    zlib1g-dev libncurses5-dev libreadline-dev libxt-dev \
+    mercurial graphviz python python-dev python3 python3-dev \
+    gnuplot gnuplot-qt gnuplot-data ca-certificates && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 100 && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 100 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Build foam-extend with the correct final installation path
+WORKDIR /foam
+RUN git clone --depth=1 --single-branch http://git.code.sf.net/p/foam-extend/foam-extend-4.1 foam-extend-4.1 && \
+    cd foam-extend-4.1 && \
+    echo "export WM_THIRD_PARTY_USE_BISON_27=1" >> etc/prefs.sh && \
+    echo "export WM_CC='gcc-4.9'" >> etc/prefs.sh && \
+    echo "export WM_CXX='g++-4.9'" >> etc/prefs.sh && \
+    sed -i -e 's=rpmbuild --define=rpmbuild --define "_build_id_links none" --define=' ThirdParty/tools/makeThirdPartyFunctionsForRPM && \
+    sed -i -e 's/gcc/\$(WM_CC)/' wmake/rules/linux64Gcc/c && \
+    sed -i -e 's/g++/\$(WM_CXX)/' wmake/rules/linux64Gcc/c++ && \
+    bash -c "export foamInstall=/foam && source etc/bashrc && ./Allwmake.firstInstall" && \
+    # Aggressive cleanup
+    find . -name "*.o" -delete && \
+    find . -name "*.a" -delete && \
+    find . -name "*.so.*" -delete && \
+    find . -name "*.dep" -delete && \
+    find . -name "Make" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    rm -rf ThirdParty/rpmBuild ThirdParty/AllMake.* && \
+    rm -rf .git doc/Doxygen && \
+    find . -name "*.C" -delete && \
+    find . -name "*.H" -delete && \
+    find . -name "*.cpp" -delete && \
+    find . -name "*.hpp" -delete && \
+    find . -name "*.orig" -delete && \
+    find . -name "*.rej" -delete && \
+    find . -name "*~" -delete && \
+    find . -name "*.bak" -delete && \
+    # Remove tutorial source code but keep binaries
+    find tutorials -name "*.C" -delete && \
+    find tutorials -name "*.H" -delete && \
+    # Remove unnecessary documentation
+    rm -rf doc/Guides-a4/*.pdf || true && \
+    # Strip binaries to reduce size
+    find . -type f -executable -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+# Minimal runtime stage
+FROM ubuntu:16.04 AS runtime
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install minimal runtime dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libstdc++6 libgcc1 libgomp1 bash \
+    liblapack3 libblas3 ca-certificates \
+    python3-minimal libgl1-mesa-glx libxt6 && \
+    # Remove unnecessary files
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    rm -rf /usr/share/doc/* /usr/share/man/* /usr/share/info/* && \
+    rm -rf /var/cache/debconf/* && \
+    # Create non-root user with correct home directory structure
+    useradd -m -s /bin/bash foam && \
+    mkdir -p /foam && \
+    chown foam:foam /foam
+
+# Copy the built foam-extend installation
+COPY --from=builder --chown=foam:foam /foam /foam
+
+WORKDIR /foam
+
+# Create the proper entrypoint script
+COPY --chown=foam:foam <<'EOF' /usr/local/bin/docker-entrypoint.sh
+#!/bin/bash
+# Set the foam installation path
+export foamInstall=/foam
+# Source the foam-extend environment
+source /foam/foam-extend-4.1/etc/bashrc
+# Create user run directory
+mkdir -p $FOAM_RUN
+# Execute the command
+exec "$@"
+EOF
+
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+USER foam
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["bash"]
+
+# Add labels for better maintainability
+LABEL maintainer="your-email@example.com"
+LABEL description="Ultra-optimized foam-extend-4.1 container"
+LABEL version="4.1" 

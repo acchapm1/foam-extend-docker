@@ -1,0 +1,29 @@
+# Version control
+.git
+.gitignore
+
+# Documentation
+README.md
+GEMINI.md
+*.md
+
+# Scripts not needed in container
+build-foamextended.sh
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp 
