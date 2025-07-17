@@ -17,4 +17,4 @@ fi
 
 echo "Running Apptainer image: $IMAGE_NAME"
 echo "Mounting host directory: $WORKDIR to /work inside the container"
-apptainer exec --bind "$WORKDIR":/work -W /work -H "$WORKDIR" -C -e "$IMAGE_NAME" bash --login "$@" 
+apptainer exec --no-privs --bind "$WORKDIR":/work -W /work -H "$WORKDIR" -C -e "$IMAGE_NAME" bash --login "$@" 

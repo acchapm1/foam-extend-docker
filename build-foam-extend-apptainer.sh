@@ -10,5 +10,5 @@ if [ $# -ge 1 ]; then
 fi
 
 echo "Building Apptainer image: $IMAGE_NAME from $DEF_FILE"
-apptainer build "$IMAGE_NAME" "$DEF_FILE"
+apptainer build --fakeroot "$IMAGE_NAME" "$DEF_FILE"
 echo "Build complete: $IMAGE_NAME" 

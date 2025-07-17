@@ -18,6 +18,12 @@ From: ubuntu:16.04
 
 %post
     export DEBIAN_FRONTEND=noninteractive
+
+    # Overwrite sources.list for EOL Ubuntu 16.04
+    echo "deb http://old-releases.ubuntu.com/ubuntu/ xenial main restricted universe multiverse" > /etc/apt/sources.list
+    echo "deb http://old-releases.ubuntu.com/ubuntu/ xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list
+    echo "deb http://old-releases.ubuntu.com/ubuntu/ xenial-security main restricted universe multiverse" >> /etc/apt/sources.list
+
     apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential git gcc-4.9 g++-4.9 bison flex cmake curl rpm \
