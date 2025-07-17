@@ -19,10 +19,11 @@ From: ubuntu:16.04
 %post
     export DEBIAN_FRONTEND=noninteractive
 
-    # Overwrite sources.list for EOL Ubuntu 16.04
-    echo "deb http://old-releases.ubuntu.com/ubuntu/ xenial main restricted universe multiverse" > /etc/apt/sources.list
-    echo "deb http://old-releases.ubuntu.com/ubuntu/ xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list
-    echo "deb http://old-releases.ubuntu.com/ubuntu/ xenial-security main restricted universe multiverse" >> /etc/apt/sources.list
+    # Use Ubuntu 16.04 snapshot archive for EOL support
+    echo "deb http://snapshot.debian.org/archive/ubuntu/20230425T000000Z xenial main restricted universe multiverse" > /etc/apt/sources.list
+    echo "deb http://snapshot.debian.org/archive/ubuntu/20230425T000000Z xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list
+    echo "deb http://snapshot.debian.org/archive/ubuntu/20230425T000000Z xenial-security main restricted universe multiverse" >> /etc/apt/sources.list
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
 
     apt-get update
     apt-get install -y apt-transport-https ca-certificates
