@@ -20,9 +20,9 @@ From: ubuntu:16.04
     export DEBIAN_FRONTEND=noninteractive
 
     # Use Ubuntu 16.04 snapshot archive for EOL support
-    echo "deb http://snapshot.debian.org/archive/ubuntu/20230425T000000Z xenial main restricted universe multiverse" > /etc/apt/sources.list
-    echo "deb http://snapshot.debian.org/archive/ubuntu/20230425T000000Z xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list
-    echo "deb http://snapshot.debian.org/archive/ubuntu/20230425T000000Z xenial-security main restricted universe multiverse" >> /etc/apt/sources.list
+    echo "deb http://snapshot.debian.org/archive/ubuntu/20220531T000000Z xenial main restricted universe multiverse" > /etc/apt/sources.list
+    echo "deb http://snapshot.debian.org/archive/ubuntu/20220531T000000Z xenial-updates main restricted universe multiverse" >> /etc/apt/sources.list
+    echo "deb http://snapshot.debian.org/archive/ubuntu/20220531T000000Z xenial-security main restricted universe multiverse" >> /etc/apt/sources.list
     echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
 
     apt-get update
