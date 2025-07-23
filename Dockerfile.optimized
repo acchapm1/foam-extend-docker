@@ -9,7 +9,8 @@ RUN apt-get update && \
     build-essential git gcc-4.9 g++-4.9 bison flex cmake curl rpm \
     zlib1g-dev libncurses5-dev libreadline-dev libxt-dev \
     mercurial graphviz python python-dev python3 python3-dev \
-    gnuplot gnuplot-qt gnuplot-data ca-certificates && \
+    gnuplot gnuplot-qt gnuplot-data ca-certificates \
+    openmpi-bin libopenmpi-dev && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 100 && \
     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 100 && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -24,6 +25,7 @@ RUN git clone --depth=1 --single-branch http://git.code.sf.net/p/foam-extend/foa
     sed -i -e 's=rpmbuild --define=rpmbuild --define "_build_id_links none" --define=' ThirdParty/tools/makeThirdPartyFunctionsForRPM && \
     sed -i -e 's/gcc/\$(WM_CC)/' wmake/rules/linux64Gcc/c && \
     sed -i -e 's/g++/\$(WM_CXX)/' wmake/rules/linux64Gcc/c++ && \
+    sed -i -e '50s/^/#/' -e '53s/^#//' etc/bashrc && \
     bash -c "export foamInstall=/foam && source etc/bashrc && ./Allwmake.firstInstall" && \
     # Aggressive cleanup
     find . -name "*.o" -delete && \
@@ -59,6 +61,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libstdc++6 libgcc1 libgomp1 bash \
     liblapack3 libblas3 ca-certificates \
+    openmpi-bin \
     python3-minimal libgl1-mesa-glx libxt6 && \
     # Remove unnecessary files
     apt-get clean && \

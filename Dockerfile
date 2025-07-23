@@ -33,6 +33,8 @@ RUN apt-get update && \
     gnuplot \
     gnuplot-qt \
     gnuplot-data \
+    openmpi-bin \
+    libopenmpi-dev \
     ca-certificates && \
     # Set gcc and g++ to point to version 4.9
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 100 && \
@@ -59,6 +61,9 @@ RUN echo "export WM_THIRD_PARTY_USE_BISON_27=1" >> etc/prefs.sh && \
 RUN sed -i -e 's=rpmbuild --define=rpmbuild --define "_build_id_links none" --define=' ThirdParty/tools/makeThirdPartyFunctionsForRPM && \
     sed -i -e 's/gcc/\$(WM_CC)/' wmake/rules/linux64Gcc/c && \
     sed -i -e 's/g++/\$(WM_CXX)/' wmake/rules/linux64Gcc/c++
+
+# Modify bashrc for MPI build
+RUN sed -i -e '50s/^/#/' -e '53s/^#//' etc/bashrc
 
 # Compile foam-extend with correct installation path
 RUN bash -c "export foamInstall=/foam && source etc/bashrc && ./Allwmake.firstInstall"
@@ -103,6 +108,8 @@ RUN apt-get update && \
     libxt6 \
     # Networking
     ca-certificates \
+    # MPI runtime
+    openmpi-bin \
     # Python runtime (if needed)
     python3-minimal \
     # Clean up
